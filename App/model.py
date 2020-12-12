@@ -41,8 +41,36 @@ de creacion y consulta sobre las estructuras de datos.
 # -----------------------------------------------------
 #                       API
 # -----------------------------------------------------
+def newAnalyzer():
+    try:
+        analyzer = {
+                    'taxis': None,
+                    'connections': None,
+                    'components': None,
+                    'companias' : None,
+                    'paths': None
+                    }
+        analyzer['companias'] = lt.newList(datastructure='LINKED_LIST', cmpfunction=None)
+        analyzer['taxi'] = lt.newList(datastructure='LINKED_LIST', cmpfunction=None)            
+        analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
+                                              directed=True,
+                                              size=14000,
+                                              comparefunction=compareStopIds)
+        return analyzer
+    except Exception as exp:
+        error.reraise(exp, 'model:newAnalyzer')
 
 # Funciones para agregar informacion al grafo
+
+def load_taxi(analyzer, server):
+    lt.addFirst(analyzer['taxis'], server['taxi_id'])
+    return analyzer
+def load_compañia(analyzer, server):
+    if server['company'] == None:
+        lt.addFirst(analyzer['companias'], 'Independent Owner')
+    else:
+        lt.addFirst(analyzer['compañias'], server['company'])
+    return analyzer
 
 # ==============================
 # Funciones de consulta
@@ -55,3 +83,29 @@ de creacion y consulta sobre las estructuras de datos.
 # ==============================
 # Funciones de Comparacion
 # ==============================
+def compareStopIds(stop, keyvaluestop):
+    """
+    Compara dos estaciones
+    """
+    stopcode = keyvaluestop['key']
+    if (stop == stopcode):
+        return 0
+    elif (stop > stopcode):
+        return 1
+    else:
+        return -1
+#===============================
+#Funciones rquerimiento A
+#===============================
+def total_taxis(analyzer):
+    x = lt.size(analyzer['taxi'])
+    return x
+def total_companias(analyzer):
+    x = lt.size(analyzer['companias'])
+    return x
+def top_companias_taxis(analyzer, N):
+    x = lt.subList(analyzer['top_company_taxis'],0,N)
+    return x
+def top_company(analyzer, M):
+    x = lt.subList(analyzer['top_company'], 0,M)
+    return x
