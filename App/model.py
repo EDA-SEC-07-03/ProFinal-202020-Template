@@ -31,6 +31,7 @@ from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
+from DISClib.Algorithms.Sorting import shellsort as she
 assert config
 
 """
@@ -50,8 +51,8 @@ def newAnalyzer():
                     'companias' : None,
                     'paths': None
                     }
-        analyzer['companias'] = lt.newList(datastructure='LINKED_LIST', cmpfunction=None)
-        analyzer['taxi'] = lt.newList(datastructure='LINKED_LIST', cmpfunction=None)            
+        analyzer['companias'] = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareCompanyName)
+        analyzer['taxi'] = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareTaxiIds)            
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
                                               size=14000,
@@ -63,15 +64,54 @@ def newAnalyzer():
 # Funciones para agregar informacion al grafo
 
 def load_taxi(analyzer, server):
-    lt.addFirst(analyzer['taxis'], server['taxi_id'])
+    lt.addLast(analyzer['taxi'], server['taxi_id'])
     return analyzer
 def load_compañia(analyzer, server):
     if server['company'] == None:
-        lt.addFirst(analyzer['companias'], 'Independent Owner')
+        lt.addLast(analyzer['companias'], 'Independent Owner')
     else:
-        lt.addFirst(analyzer['compañias'], server['company'])
+        lt.addLast(analyzer['companias'], server['company'])
     return analyzer
 
+def addStopConnection(analyzer, lastservice, servicess, service):
+    try:
+        origin = servicess
+        destination = lastservice
+        addStation(analyzer, origin)
+        peso = str(service['tripduration'])
+        addStation(analyzer, destination)
+        addConnection(analyzer, origin, destination, time)
+        return analyzer
+    except Exception as exp:
+        error.reraise(exp, 'model:addStopConnection')
+
+def agregar_camino(analyser, initial_id, dest_id, server):
+    time = int(server['tripduration'])
+    addStation(analyser, initial_id)
+    addStation(analyser, dest_id)
+    addConnection(analyser, initial_id, dest_id, time)
+    return analyser
+
+
+def addStation(analyzer, stationid):
+    """
+    Adiciona una estación como un vertice del grafo
+    """
+    try:
+        if not gr.containsVertex(analyzer['connections'], stationid):
+            gr.insertVertex(analyzer['connections'], stationid)
+        return analyzer
+    except Exception as exp:
+        error.reraise(exp, 'model:addstop')
+
+def addConnection(analyzer, origin, destination, time):
+    """
+    Adiciona un arco entre dos estaciones
+    """
+    edge = gr.getEdge(analyzer['connections'], origin, destination)
+    if edge is None:
+        gr.addEdge(analyzer['connections'], origin, destination, time)
+    return analyzer
 # ==============================
 # Funciones de consulta
 # ==============================
@@ -94,8 +134,23 @@ def compareStopIds(stop, keyvaluestop):
         return 1
     else:
         return -1
+def compareTaxiIds(taxi_1, taxi_2):
+    if taxi_1 == taxi_2:
+        return 0
+    else:
+        return 1
+def compareCompanyName(compania_1, compania_2):
+    if compania_1 == compania_2:
+        return 0
+    else:
+        return 1
+def comparador_ascendente(pos1, pos2):
+    if int(pos1[1]) > int(pos2[1]):
+        return True
+    else:
+        return False
 #===============================
-#Funciones rquerimiento A
+#Funciones requerimiento A
 #===============================
 def total_taxis(analyzer):
     x = lt.size(analyzer['taxi'])
@@ -104,8 +159,32 @@ def total_companias(analyzer):
     x = lt.size(analyzer['companias'])
     return x
 def top_companias_taxis(analyzer, N):
-    x = lt.subList(analyzer['top_company_taxis'],0,N)
-    return x
-def top_company(analyzer, M):
-    x = lt.subList(analyzer['top_company'], 0,M)
-    return x
+    lst = lt.newList(datastructure= 'ARRAY_LIST',cmpfunction=None)
+    dic = analyzer['top_company_taxis']
+    dic_to = {}
+    x = 0
+    for i in range(lt.size(analyzer['companias'])):
+        guardar = dic[lt.getElement(analyzer['companias'], i)]
+        dic_to[guardar] = lt.getElement(analyzer['companias'], i)
+    while x != N:
+        maximo = max(dic_to)
+        tuplencio = (dic_to[maximo], maximo)
+        del dic_to[maximo]
+        lt.addLast(lst,tuplencio)
+        x +=1
+    return lst['elements']
+def top_company(analyzer, N):
+    lst = lt.newList(datastructure= 'ARRAY_LIST',cmpfunction=None)
+    dic = analyzer['top_company']
+    dic_to = {}
+    x = 0
+    for i in range(lt.size(analyzer['companias'])):
+        guardar = dic[lt.getElement(analyzer['companias'], i)]
+        dic_to[guardar] = lt.getElement(analyzer['companias'], i)
+    while x != N:
+        maximo = max(dic_to)
+        tuplencio = (dic_to[maximo], maximo)
+        del dic_to[maximo]
+        lt.addLast(lst,tuplencio)
+        x +=1
+    return lst['elements']

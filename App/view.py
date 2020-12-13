@@ -42,12 +42,58 @@ operación seleccionada.
 # ___________________________________________________
 #  Variables
 # ___________________________________________________
-
+doc_1 =  'taxi-trips-wrvz-psew-subset-small.csv'
+doc_2 = 'taxi-trips-wrvz-psew-subset-medium.csv'
+doc_3 = 'taxi-trips-wrvz-psew-subset-large.csv'
 
 # ___________________________________________________
 #  Menu principal
 # ___________________________________________________
-
+def printMenu():
+    print("\n")
+    print("*******************************************")
+    print("Bienvenido")
+    print("1- Inicializar Analizador")
+    print("2- Elegir archivo y cargar informacion")
+    print("3- Total de taxis")
+    print("4- Total de Compañias")
+    print("5- Top compañias taxis afiliados")
+    print("6-top compañias por servicios")
+    print("0-salir")
 """
 Menu principal
 """
+def menu_principal():
+    while True:
+        printMenu()
+        inputs = input('Seleccione una opción para continuar\n>')
+        if int(inputs[0]) == 1:
+            print("\nInicializando....")
+            cont = controller.init()
+        elif int(inputs[0]) == 2:
+            print("\nCargando información de bicicletas ....")
+            eleccion = int(input("Escriba 1 para el archivo pequeño, 2 para el mediano y tres para el grande: "))
+            if eleccion == 1:
+                servicefile = doc_1
+            if eleccion == 2:
+                servicefile = doc_2
+            if eleccion == 3:
+                servicefile = doc_3
+            controller.loadServices_reqA(cont, servicefile)
+        elif int(inputs[0]) == 3:
+            print("El total de taxis fue: ")
+            print(controller.cantidad_taxis(cont))
+        elif int(inputs[0]) == 4:
+            print("El total de compañias fue: ")
+            print(controller.cantidad_companias(cont))
+        elif int(inputs[0]) == 5:
+            y = int(input("De que tamaño quiere el top de compañias por taxis afiliados: "))
+            print('Este es el top ordenado de mayor a menor')
+            print(controller.top_c_taxis(cont, y))
+        elif int(inputs[0]) == 6:
+            x = int(input("De que tamaño quiere el top de compañias por servicios: "))
+            print('Este es el top ordenado de mayor a menor')
+            print(controller.top_companias(cont, x))
+        else:
+            sys.exit(0)
+menu_principal()

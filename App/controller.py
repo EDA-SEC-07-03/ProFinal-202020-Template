@@ -58,31 +58,35 @@ def loadServices_reqA(analyzer, serverfile):
     dic_company_taxis = {}
     dic_quantity = {}
     for server in input_file:
-        if lt.isPresent(analyzer['taxi'], server['taxi_id']) == 0:
-            model.load_taxi(analyzer, server)
-        if lt.isPresent(analyzer['companias']) == 0:
-            model.load_compañia(analyzer, server)
-            dic_company_taxis[server['company']] = 1
-            dic_quantity[server['company']] = 1
-        if (lt.isPresent(analyzer['taxi'], server['taxi_id']) == 0) and (lt.isPresent(analyzer['companias']) != 0):
-            dic_company_taxis[server['company']] += 1
-        else:
-            dic_quantity[server['company']] += 1
-    analyzer['top_company_taxis'] = max_company(dic_company_taxis)
-    analyzer['top_company'] = max_company(dic_quantity)
+        if (server['taxi_id'] != None) and (server['company']) != None:
+            if lt.isPresent(analyzer['taxi'], server['taxi_id']) == 0:
+                model.load_taxi(analyzer, server)
+                if lt.isPresent(analyzer['companias'],server['company']) == 0:
+                    model.load_compañia(analyzer, server)
+                    dic_company_taxis[server['company']] = 1
+                    dic_quantity[server['company']] = 1
+                if (lt.isPresent(analyzer['companias'], server['company']) != 0):
+                    dic_company_taxis[server['company']] += 1
+            else:
+                dic_quantity[server['company']] += 1
+    analyzer['top_company_taxis'] = dic_company_taxis
+    analyzer['top_company'] = dic_quantity
     return analyzer
     
-
-def max_company(dic):
-    lst = lt.newList()
-    for i in dic:
-        x = max(dic)
-        y = dic[x]
-        lt.addLast(lst, (x,y))
-        dic[x] = 0
-    return lst
         
 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
+def cantidad_taxis(analyzer):
+    x = model.total_taxis(analyzer)
+    return x
+def cantidad_companias(analyzer):
+    x = model.total_companias(analyzer)
+    return x
+def top_c_taxis(analyzer, N):
+    x = model.top_companias_taxis(analyzer, N)
+    return x
+def top_companias(analyzer, M):
+    x = model.top_company(analyzer, M)
+    return x
