@@ -58,7 +58,8 @@ def printMenu():
     print("3- Total de taxis")
     print("4- Total de Compañias")
     print("5- Top compañias taxis afiliados")
-    print("6-top compañias por servicios")
+    print("6- top compañias por servicios")
+    print('7- mejor camino entre zonas y rango horario')
     print("0-salir")
 """
 Menu principal
@@ -97,9 +98,9 @@ def menu_principal():
         elif int(inputs[0]) == 7:
             z = int(input("Digite el codigo del lugar de salida: "))
             llegada = int(input("Digite el codigo del lugar de llegada: "))
-            tiempo_1 = input('ponga el limite inferior del rango horario en formato (h:min:seg): ')
-            tiempo_2 = input('ponga el limite superior del rango de horario en formato (h:min:seg): ')
-
+            tiempo_1 = input("ponga el limite inferior del rango horario en formato (h:min:seg): ")
+            tiempo_2 = input("ponga el limite superior del rango de horario en formato (h:min:seg): ")
+            print(controller.camino_menor(cont, z, llegada, tiempo_1, tiempo_2))
         else:
             sys.exit(0)
 menu_principal()

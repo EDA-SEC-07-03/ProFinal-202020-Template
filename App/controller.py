@@ -31,6 +31,7 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import map as m
 from DISClib.ADT.graph import gr
 from DISClib.Utils import error as error
+import datetime
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 Existen algunas operaciones en las que se necesita invocar
@@ -131,6 +132,7 @@ def top_c_taxis(analyzer, N):
 def top_companias(analyzer, M):
     x = model.top_company(analyzer, M)
     return x
-def camino_menor(analyzer, ida, llegada, rango_tiempo):
-    x = model.ruta_rango_tiempo
+def camino_menor(analyzer, ida, llegada, tiempo_1, tiempo_2):
+    rango_tiempo = (tiempo_1.time(), tiempo_2.time())
+    x = model.ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo)
     return x 
