@@ -32,6 +32,7 @@ from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
 from DISClib.Algorithms.Sorting import shellsort as she
+import datetime
 assert config
 
 """
@@ -73,14 +74,14 @@ def load_compañia(analyzer, server):
         lt.addLast(analyzer['companias'], server['company'])
     return analyzer
 
-def addStopConnection(analyzer, lastservice, servicess, service):
+def addStopConnection(analyzer, destination_area, servicess, service):
     try:
-        origin = servicess
-        destination = lastservice
+        origin = origin_area
+        destination = destination_area
         addStation(analyzer, origin)
         peso = str(service['tripduration'])
         addStation(analyzer, destination)
-        addConnection(analyzer, origin, destination, time)
+        addConnection(analyzer, origin, destination, peso)
         return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:addStopConnection')
@@ -115,7 +116,25 @@ def addConnection(analyzer, origin, destination, time):
 # ==============================
 # Funciones de consulta
 # ==============================
+def getDateTimeTaxiTrip(taxitrip):
 
+    """
+
+    Recibe la informacion de un servicio de taxi leido del archivo de datos (parametro).
+
+    Retorna de forma separada la fecha (date) y el tiempo (time) del dato 'trip_start_timestamp'
+
+    Los datos date se pueden comparar con <, >, <=, >=, ==, !=
+
+    Los datos time se pueden comparar con <, >, <=, >=, ==, !=
+
+    """
+
+    tripstartdate = taxitrip['trip_start_timestamp']
+
+    taxitripdatetime = datetime.datetime.strptime(tripstartdate, '%Y-%m-%dT%H:%M:%S.%f')
+
+    return taxitripdatetime.date(), taxitripdatetime.time()
 # ==============================
 # Funciones Helper
 # ==============================
