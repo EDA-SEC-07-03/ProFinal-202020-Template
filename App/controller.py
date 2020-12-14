@@ -104,7 +104,7 @@ def load_services_req_C(analyzer,server):
         if m.contains(ubicacion, tuplencio) is not True:
             model.addStopConnection(grafo,llegada, inicio, server)
             m.put(ubicacion, tuplencio, server['trip_seconds'])
-        analyzer['rango_tiempo'] =  grafos
+        analyzer['rango_tiempos'] =  grafos
         return analyzer
     except Exception as exp:
         error.reraise(exp, print(rango_conectados[rango_tiempo]))
@@ -116,6 +116,10 @@ def comparador_ejemplo(key_1, key_2):
         return 1
     else: 
         return 0      
+def transformador_hora(hora):
+    hora=datetime.datetime.strptime(hora,"%H:%M")
+    hora=hora.time()
+    return hora
 
 # ___________________________________________________
 #  Funciones para consultas
@@ -133,6 +137,6 @@ def top_companias(analyzer, M):
     x = model.top_company(analyzer, M)
     return x
 def camino_menor(analyzer, ida, llegada, tiempo_1, tiempo_2):
-    rango_tiempo = (tiempo_1.time(), tiempo_2.time())
+    rango_tiempo = (transformador_hora(tiempo_1), transformador_hora(tiempo_2))
     x = model.ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo)
     return x 

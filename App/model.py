@@ -280,7 +280,7 @@ def top_company(analyzer, N):
 #Funciones requerimiento C
 #===============================
 def ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo):
-    grafos = analyzer['rango_tiempo']
+    grafos = analyzer['rango_tiempos']
     minimumCostPaths(analyzer, ida, grafos[rango_tiempo])
     camino = minimumCostPath(analyzer, llegada)
     return camino
