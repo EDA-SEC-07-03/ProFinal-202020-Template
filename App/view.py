@@ -94,6 +94,12 @@ def menu_principal():
             x = int(input("De que tamaño quiere el top de compañias por servicios: "))
             print('Este es el top ordenado de mayor a menor')
             print(controller.top_companias(cont, x))
+        elif int(inputs[0]) == 7:
+            z = int(input("Digite el codigo del lugar de salida: "))
+            llegada = int(input("Digite el codigo del lugar de llegada: "))
+            tiempo_1 = input('ponga el limite inferior del rango horario en formato (h:min:seg): ')
+            tiempo_2 = input('ponga el limite superior del rango de horario en formato (h:min:seg): ')
+
         else:
             sys.exit(0)
 menu_principal()

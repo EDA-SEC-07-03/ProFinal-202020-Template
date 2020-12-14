@@ -53,7 +53,8 @@ def newAnalyzer():
                     'paths': None
                     }
         analyzer['companias'] = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareCompanyName)
-        analyzer['taxi'] = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareTaxiIds)            
+        analyzer['taxi'] = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareTaxiIds)
+        analyzer['rango_tiempo'] = m.newMap()        
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
                                               size=14000,
@@ -74,45 +75,45 @@ def load_compañia(analyzer, server):
         lt.addLast(analyzer['companias'], server['company'])
     return analyzer
 
-def addStopConnection(analyzer, destination_area, servicess, service):
+def addStopConnection(grafo, destination_area, origin_area, service):
     try:
         origin = origin_area
         destination = destination_area
-        addStation(analyzer, origin)
-        peso = str(service['tripduration'])
-        addStation(analyzer, destination)
-        addConnection(analyzer, origin, destination, peso)
-        return analyzer
+        addStation(grafo, origin)
+        peso = service['trip_seconds']
+        addStation(grafo, destination)
+        addConnection(grafo, origin, destination, peso)
+        return grafo
     except Exception as exp:
         error.reraise(exp, 'model:addStopConnection')
 
 def agregar_camino(analyser, initial_id, dest_id, server):
-    time = int(server['tripduration'])
+    time = int(server['trip_seconds'])
     addStation(analyser, initial_id)
     addStation(analyser, dest_id)
     addConnection(analyser, initial_id, dest_id, time)
     return analyser
 
 
-def addStation(analyzer, stationid):
+def addStation(grafo, stationid):
     """
     Adiciona una estación como un vertice del grafo
     """
     try:
-        if not gr.containsVertex(analyzer['connections'], stationid):
-            gr.insertVertex(analyzer['connections'], stationid)
-        return analyzer
+        if not gr.containsVertex(grafo, stationid):
+            gr.insertVertex(grafo, stationid)
+        return grafo
     except Exception as exp:
         error.reraise(exp, 'model:addstop')
 
-def addConnection(analyzer, origin, destination, time):
+def addConnection(grafo, origin, destination, time):
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(analyzer['connections'], origin, destination)
+    edge = gr.getEdge(grafo, origin, destination)
     if edge is None:
-        gr.addEdge(analyzer['connections'], origin, destination, time)
-    return analyzer
+        gr.addEdge(grafo, origin, destination, time)
+    return grafo
 # ==============================
 # Funciones de consulta
 # ==============================
@@ -135,9 +136,79 @@ def getDateTimeTaxiTrip(taxitrip):
     taxitripdatetime = datetime.datetime.strptime(tripstartdate, '%Y-%m-%dT%H:%M:%S.%f')
 
     return taxitripdatetime.date(), taxitripdatetime.time()
+def getDateTimeTaxiTrip_end(taxitrip):
+
+    """
+
+    Recibe la informacion de un servicio de taxi leido del archivo de datos (parametro).
+
+    Retorna de forma separada la fecha (date) y el tiempo (time) del dato 'trip_start_timestamp'
+
+    Los datos date se pueden comparar con <, >, <=, >=, ==, !=
+
+    Los datos time se pueden comparar con <, >, <=, >=, ==, !=
+
+    """
+
+    tripstartdate = taxitrip['trip_end_timestamp']
+
+    taxitripdatetime = datetime.datetime.strptime(tripstartdate, '%Y-%m-%dT%H:%M:%S.%f')
+
+    return taxitripdatetime.date(), taxitripdatetime.time()
 # ==============================
-# Funciones Helper
+# Funciones de consulta
 # ==============================
+
+
+def connectedComponents(analyzer):
+    """
+    Calcula los componentes conectados del grafo
+    Se utiliza el algoritmo de Kosaraju
+    """
+    analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
+    return scc.connectedComponents(analyzer['components'])
+
+
+def minimumCostPaths(analyzer, initialStation, grafo):
+    """
+    Calcula los caminos de costo mínimo desde la estacion initialStation
+    a todos los demas vertices del grafo
+    """
+    analyzer['paths'] = djk.Dijkstra(grafo, initialStation)
+    return analyzer
+
+
+def hasPath(analyzer, destStation):
+    """
+    Indica si existe un camino desde la estacion inicial a la estación destino
+    Se debe ejecutar primero la funcion minimumCostPaths
+    """
+    return djk.hasPathTo(analyzer['paths'], destStation)
+
+
+def minimumCostPath(analyzer, destStation):
+    """
+    Retorna el camino de costo minimo entre la estacion de inicio
+    y la estacion destino
+    Se debe ejecutar primero la funcion minimumCostPaths
+    """
+    path = djk.pathTo(analyzer['paths'], destStation)
+    return path
+
+
+def totalStops(analyzer):
+    """
+    Retorna el total de estaciones (vertices) del grafo
+    """
+    return gr.numVertices(analyzer['connections'])
+
+
+def totalConnections(analyzer):
+    """
+    Retorna el total arcos del grafo
+    """
+    return gr.numEdges(analyzer['connections'])
+
 
 # ==============================
 # Funciones de Comparacion
@@ -149,8 +220,6 @@ def compareStopIds(stop, keyvaluestop):
     stopcode = keyvaluestop['key']
     if (stop == stopcode):
         return 0
-    elif (stop > stopcode):
-        return 1
     else:
         return -1
 def compareTaxiIds(taxi_1, taxi_2):
@@ -207,3 +276,13 @@ def top_company(analyzer, N):
         lt.addLast(lst,tuplencio)
         x +=1
     return lst['elements']
+#===============================
+#Funciones requerimiento C
+#===============================
+def ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo):
+    grafos = analyzer['rango_tiempo']
+    minimumCostPaths(analyzer, ida, grafos[rango_tiempo])
+    camino = minimumCostPath(analyzer, llegada)
+    return camino
+
+    

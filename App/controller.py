@@ -29,6 +29,8 @@ from App import model
 import csv
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as m
+from DISClib.ADT.graph import gr
+from DISClib.Utils import error as error
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 Existen algunas operaciones en las que se necesita invocar
@@ -69,11 +71,50 @@ def loadServices_reqA(analyzer, serverfile):
                     dic_company_taxis[server['company']] += 1
             else:
                 dic_quantity[server['company']] += 1
+        if (server['pickup_community_area'] != None) and (server['pickup_community_area'] != '') and (server['dropoff_community_area'] != '') and (server['dropoff_community_area'] != None):
+            load_services_req_C(analyzer, server)
     analyzer['top_company_taxis'] = dic_company_taxis
     analyzer['top_company'] = dic_quantity
     return analyzer
+
+def load_services_req_C(analyzer,server):
+    dia_hora_inicio = model.getDateTimeTaxiTrip(server)
+    dia_hora_fin = model.getDateTimeTaxiTrip_end(server)
+    rango_tiempo = (dia_hora_inicio[1], dia_hora_fin[1])
+    mapa = analyzer['rango_tiempo']
+    nombre_grafo = analyzer['connections']
+    rango_conectados = {}
+    grafos = {}
+    conectados = m.newMap(comparefunction=comparador_ejemplo)
+    inicio = server['pickup_community_area']
+    llegada = server['dropoff_community_area']
+    tuplencio = (inicio, llegada)
+    if m.contains(mapa,rango_tiempo) == False:
+        m.put(mapa,rango_tiempo, 1)
+        grafos[rango_tiempo] =  nombre_grafo
+        grafo = grafos[rango_tiempo] 
+        model.addStopConnection(grafo, llegada,inicio,server)
+        rango_conectados[rango_tiempo] = conectados
+        ubicacion = rango_conectados[rango_tiempo]
+        m.put(ubicacion, tuplencio, server['trip_seconds'])
+    grafo = grafos[rango_tiempo]
+    ubicacion = rango_conectados[rango_tiempo]
+    try:
+        if m.contains(ubicacion, tuplencio) is not True:
+            model.addStopConnection(grafo,llegada, inicio, server)
+            m.put(ubicacion, tuplencio, server['trip_seconds'])
+        analyzer['rango_tiempo'] =  grafos
+        return analyzer
+    except Exception as exp:
+        error.reraise(exp, print(rango_conectados[rango_tiempo]))
+
+
     
-        
+def comparador_ejemplo(key_1, key_2):
+    if key_1 == key_2:
+        return 1
+    else: 
+        return 0      
 
 # ___________________________________________________
 #  Funciones para consultas
@@ -90,3 +131,6 @@ def top_c_taxis(analyzer, N):
 def top_companias(analyzer, M):
     x = model.top_company(analyzer, M)
     return x
+def camino_menor(analyzer, ida, llegada, rango_tiempo):
+    x = model.ruta_rango_tiempo
+    return x 
