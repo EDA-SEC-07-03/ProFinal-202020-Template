@@ -279,10 +279,22 @@ def top_company(analyzer, N):
 #===============================
 #Funciones requerimiento C
 #===============================
-def ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo):
+def ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo, rango_t):
     grafos = analyzer['rango_tiempos']
-    minimumCostPaths(analyzer, ida, grafos[rango_tiempo])
-    camino = minimumCostPath(analyzer, llegada)
+    resto = lt.newList(datastructure='ARRAY_LIST', cmpfunction=None)
+    mejor = lt.newList()
+    for i in grafos:
+        hora_1 = i[0]
+        hora_2 = i[1]
+        if hora_1 == rango_tiempo:
+            lt.addLast(resto, i)
+        if hora_1 > rango_tiempo and hora_2 < rango_t:
+            lt.addLast(resto, i)
+        if hora_2 == rango_t:
+            lt.addLast(resto, i)
+    for z in resto['elements']:
+        minimumCostPaths(analyzer, ida, grafos[z])
+        camino = minimumCostPath(analyzer, llegada)
     return camino
 
-    
+

@@ -79,9 +79,9 @@ def loadServices_reqA(analyzer, serverfile):
     return analyzer
 
 def load_services_req_C(analyzer,server):
-    dia_hora_inicio = model.getDateTimeTaxiTrip(server)
-    dia_hora_fin = model.getDateTimeTaxiTrip_end(server)
-    rango_tiempo = (dia_hora_inicio[1], dia_hora_fin[1])
+    dia_hora_inicio = model.getDateTimeTaxiTrip(server)[1]
+    dia_hora_fin = model.getDateTimeTaxiTrip_end(server)[1]
+    rango_tiempo = (dia_hora_inicio, dia_hora_fin)
     mapa = analyzer['rango_tiempo']
     nombre_grafo = analyzer['connections']
     rango_conectados = {}
@@ -117,7 +117,7 @@ def comparador_ejemplo(key_1, key_2):
     else: 
         return 0      
 def transformador_hora(hora):
-    hora=datetime.datetime.strptime(hora,"%H:%M")
+    hora=datetime.datetime.strptime(hora,"%H:%M:%S")
     hora=hora.time()
     return hora
 
@@ -137,6 +137,7 @@ def top_companias(analyzer, M):
     x = model.top_company(analyzer, M)
     return x
 def camino_menor(analyzer, ida, llegada, tiempo_1, tiempo_2):
-    rango_tiempo = (transformador_hora(tiempo_1), transformador_hora(tiempo_2))
-    x = model.ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo)
+    rango_tiempo = transformador_hora(tiempo_1)
+    rango_t = transformador_hora(tiempo_2)
+    x = model.ruta_rango_tiempo(analyzer, ida, llegada, rango_tiempo, rango_t)
     return x 

@@ -98,8 +98,8 @@ def menu_principal():
         elif int(inputs[0]) == 7:
             z = int(input("Digite el codigo del lugar de salida: "))
             llegada = int(input("Digite el codigo del lugar de llegada: "))
-            tiempo_1 = input("ponga el limite inferior del rango horario en formato (h:min:seg): ")
-            tiempo_2 = input("ponga el limite superior del rango de horario en formato (h:min:seg): ")
+            tiempo_1 = input("ponga el limite inferior del rango horario en formato (h:min:seg): \n")
+            tiempo_2 = input("ponga el limite superior del rango de horario en formato (h:min:seg): \n")
             print(controller.camino_menor(cont, z, llegada, tiempo_1, tiempo_2))
         else:
             sys.exit(0)
